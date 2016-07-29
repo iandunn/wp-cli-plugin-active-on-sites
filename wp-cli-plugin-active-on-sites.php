@@ -24,10 +24,6 @@ if ( ! defined( 'WP_CLI' ) ) {
 	return;
 }
 
-// Re-set `display_errors` after WP-CLI overrides it, see https://github.com/wp-cli/wp-cli/issues/706#issuecomment-203610437
-add_filter( 'enable_wp_debug_mode_checks', '__return_true' );
-wp_debug_mode();
-
 WP_CLI::add_command( 'plugin active-on-sites', __NAMESPACE__ . '\invoke' );
 
 /**
@@ -46,6 +42,8 @@ WP_CLI::add_command( 'plugin active-on-sites', __NAMESPACE__ . '\invoke' );
  * @param array $assoc_args
  */
 function invoke( $args, $assoc_args ) {
+	reset_display_errors();
+
 	list( $target_plugin ) = $args;
 
 	WP_CLI::line();
@@ -54,6 +52,22 @@ function invoke( $args, $assoc_args ) {
 
 	WP_CLI::line();
 	display_results( $target_plugin, $found_sites );
+}
+
+/**
+ * Re-set `display_errors` after WP-CLI overrides it
+ *
+ * Normally WP-CLI disables `display_errors`, regardless of `WP_DEBUG`. This makes it so that `WP_DEBUG` is
+ * respected again, so that errors are caught more easily during development.
+ *
+ * Note that any errors/notices/warnings that PHP throws before this function is called will not be shown, so
+ * you should still examine the error log every once in awhile.
+ *
+ * @see https://github.com/wp-cli/wp-cli/issues/706#issuecomment-203610437
+ */
+function reset_display_errors() {
+	add_filter( 'enable_wp_debug_mode_checks', '__return_true' );
+	wp_debug_mode();
 }
 
 /**
