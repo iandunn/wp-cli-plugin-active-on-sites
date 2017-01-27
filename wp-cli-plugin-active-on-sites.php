@@ -103,17 +103,17 @@ function pre_flight_checks( $target_plugin ) {
  * @return array
  */
 function find_sites_with_plugin( $target_plugin ) {
-	$sites       = wp_get_sites( array( 'limit' => false ) );
+	$sites       = get_sites( array( 'number' => 10000 ) );
 	$found_sites = array();
 	$notify      = new \cli\progress\Bar( 'Checking sites', count( $sites ) );
 
 	foreach ( $sites as $site ) {
-		switch_to_blog( $site['blog_id'] );
+		switch_to_blog( $site->blog_id );
 
 		$active_plugins = array_map( 'dirname', get_option( 'active_plugins', array() ) );
 
 		if ( in_array( $target_plugin, $active_plugins, true ) ) {
-			$found_sites[] = array( $site['blog_id'], $site['domain'] . $site['path'] );
+			$found_sites[] = array( $site->blog_id, $site->domain . $site->path );
 		}
 
 		restore_current_blog();
