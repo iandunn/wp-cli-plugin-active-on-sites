@@ -34,6 +34,31 @@ WP_CLI::add_command( 'plugin active-on-sites', __NAMESPACE__ . '\invoke' );
  * <plugin_slug>
  * : The plugin to locate
  *
+ * [--field=<field>]
+ * : Prints the value of a single field for each site.
+ *
+ * [--fields=<fields>]
+ * : Limit the output to specific object fields.
+ *
+ * [--format=<format>]
+ * : Render output in a particular format.
+ * ---
+ * default: table
+ * options:
+ *   - table
+ *   - csv
+ *   - ids
+ *   - json
+ *   - count
+ *   - yaml
+ * ---
+ * ## AVAILABLE FIELDS
+ *
+ * These fields will be displayed by default for each blog:
+ *
+ * * blog_id
+ * * url
+ *
  * ## EXAMPLES
  *
  * wp plugin active-on-sites buddypress
@@ -51,7 +76,7 @@ function invoke( $args, $assoc_args ) {
 	$found_sites = find_sites_with_plugin( $target_plugin );
 
 	WP_CLI::line();
-	display_results( $target_plugin, $found_sites );
+	display_results( $target_plugin, $found_sites, $assoc_args );
 }
 
 /**
@@ -114,7 +139,10 @@ function find_sites_with_plugin( $target_plugin ) {
 		if ( is_array( $active_plugins ) ) {
 			$active_plugins = array_map( 'dirname', $active_plugins );
 			if ( in_array( $target_plugin, $active_plugins, true ) ) {
-				$found_sites[] = array( $site->blog_id, $site->domain . $site->path );
+				$found_sites[] = array(
+					'blog_id' => $site->blog_id,
+					'url'     => trailingslashit( get_site_url( $blog->blog_id ) ),
+				);
 			}
 		}
 
@@ -131,17 +159,22 @@ function find_sites_with_plugin( $target_plugin ) {
  *
  * @param string $target_plugin
  * @param array  $found_sites
+ * @param array $assoc_args
  */
-function display_results( $target_plugin, $found_sites ) {
+function display_results( $target_plugin, $found_sites, $assoc_args ) {
 	if ( ! $found_sites ) {
 		WP_CLI::line( "$target_plugin is not active on any sites." );
 		return;
 	}
 
+	if ( isset( $assoc_args['fields'] ) ) {
+		$assoc_args['fields'] = explode( ',', $assoc_args['fields'] );
+	} else {
+		$assoc_args['fields'] = array( 'blog_id', 'url' );
+	}
+
 	WP_CLI::line( "Sites where $target_plugin is active:" );
 
-	$table = new \cli\Table();
-	$table->setHeaders( array( 'Site ID', 'Site URL' ) );
-	$table->setRows( $found_sites );
-	$table->display();
+	$formatter = new \WP_CLI\Formatter( $assoc_args );
+	$formatter->display_items( $found_sites );
 }
