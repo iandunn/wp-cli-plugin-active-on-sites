@@ -110,10 +110,12 @@ function find_sites_with_plugin( $target_plugin ) {
 	foreach ( $sites as $site ) {
 		switch_to_blog( $site->blog_id );
 
-		$active_plugins = array_map( 'dirname', get_option( 'active_plugins', array() ) );
-
-		if ( in_array( $target_plugin, $active_plugins, true ) ) {
-			$found_sites[] = array( $site->blog_id, $site->domain . $site->path );
+		$active_plugins = get_option( 'active_plugins', array() );
+		if ( is_array( $active_plugins ) ) {
+			$active_plugins = array_map( 'dirname', $active_plugins );
+			if ( in_array( $target_plugin, $active_plugins, true ) ) {
+				$found_sites[] = array( $site->blog_id, $site->domain . $site->path );
+			}
 		}
 
 		restore_current_blog();
