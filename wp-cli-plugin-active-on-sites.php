@@ -35,10 +35,14 @@ WP_CLI::add_command( 'plugin active-on-sites', __NAMESPACE__ . '\invoke' );
  * : The plugin to locate
  *
  * [--field=<field>]
- * : Prints the value of a single field for each site.
+ * : Prints the value of a single field for each site. See the `fields` parameter for a list of available fields.
  *
  * [--fields=<fields>]
  * : Limit the output to specific object fields.
+ * ---
+ * default: blog_id, url
+ * optional: admin_email
+ * ---
  *
  * [--format=<format>]
  * : Render output in a particular format.
@@ -52,12 +56,6 @@ WP_CLI::add_command( 'plugin active-on-sites', __NAMESPACE__ . '\invoke' );
  *   - count
  *   - yaml
  * ---
- * ## AVAILABLE FIELDS
- *
- * These fields will be displayed by default for each blog:
- *
- * * blog_id
- * * url
  *
  * ## EXAMPLES
  *
@@ -135,13 +133,16 @@ function find_sites_with_plugin( $target_plugin ) {
 	foreach ( $sites as $site ) {
 		switch_to_blog( $site->blog_id );
 
-		$active_plugins = get_option( 'active_plugins', array() );
+		$active_plugins     = get_option( 'active_plugins', array() );
+		$active_admin_email = get_option( 'admin_email' );
+
 		if ( is_array( $active_plugins ) ) {
 			$active_plugins = array_map( 'dirname', $active_plugins );
 			if ( in_array( $target_plugin, $active_plugins, true ) ) {
 				$found_sites[] = array(
-					'blog_id' => $site->blog_id,
-					'url'     => trailingslashit( get_site_url( $site->blog_id ) ),
+					'blog_id'     => $site->blog_id,
+					'url'         => trailingslashit( get_site_url( $site->blog_id ) ),
+					'admin_email' => $active_admin_email,
 				);
 			}
 		}
