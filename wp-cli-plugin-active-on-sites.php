@@ -25,8 +25,6 @@ if ( ! defined( 'WP_CLI' ) ) {
 }
 
 if ( ! function_exists( __NAMESPACE__ . '\invoke' ) ) {
-	WP_CLI::add_command( 'plugin active-on-sites', __NAMESPACE__ . '\invoke' );
-
 	/**
 	 * List all sites in a Multisite network that have activated a given plugin.
 	 *
@@ -162,4 +160,6 @@ if ( ! function_exists( __NAMESPACE__ . '\invoke' ) ) {
 		$formatter = new \WP_CLI\Formatter( $formatter_args );
 		$formatter->display_items( $found_sites );
 	}
+
+	WP_CLI::add_command( 'plugin active-on-sites', __NAMESPACE__ . '\invoke' );
 }
