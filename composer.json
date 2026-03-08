@@ -15,5 +15,22 @@
 
 	"autoload" : {
 		"files" : [ "wp-cli-plugin-active-on-sites.php" ]
+	},
+
+	"require-dev" : {
+		"wp-cli/wp-cli-tests" : "^4.2"
+	},
+
+	"scripts" : {
+		"behat"         : "run-behat-tests",
+		"behat-rerun"   : "run-behat-tests --rerun",
+		"behat-localwp" : "bin/behat-localwp",
+		"prepare-tests" : "install-package-tests"
+	},
+
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
 	}
 }

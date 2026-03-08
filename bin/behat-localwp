@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Wrapper for running behat tests in a LocalWP environment.
+# Automatically detects the MySQL socket so you don't have to set env vars manually.
+# Run from within the Local WP shell: composer behat-localwp
+
+set -e
+
+SOCKET=$(mysql -u root -proot -e "SHOW VARIABLES LIKE 'socket'\G" 2>/dev/null | awk '/Value:/ { sub(/^.*Value: /, ""); print }')
+
+if [ -z "$SOCKET" ]; then
+	echo "Error: Could not detect MySQL socket. Are you running inside a LocalWP shell?"
+	exit 1
+fi
+
+export WP_CLI_TEST_DBHOST="localhost:${SOCKET}"
+export WP_CLI_TEST_DBROOTUSER="${WP_CLI_TEST_DBROOTUSER:-root}"
+export WP_CLI_TEST_DBROOTPASS="${WP_CLI_TEST_DBROOTPASS:-root}"
+
+# Find the full WP-CLI binary, skipping vendor/bin entries that lack plugin-install support.
+WP_CLI_BIN=""
+
+while IFS= read -r -d ':' dir; do
+	if [ -x "${dir}/wp" ] && [[ "${dir}" != */vendor/bin ]]; then
+		WP_CLI_BIN="${dir}/wp"
+		break
+	fi
+done <<< "${PATH}:"
+
+if [ -n "$WP_CLI_BIN" ]; then
+	export WP_CLI_BIN_DIR="$(dirname "$WP_CLI_BIN")"
+fi
+
+exec "$(dirname "$0")/../vendor/bin/run-behat-tests" "$@"
