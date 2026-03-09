@@ -14,6 +14,7 @@
 namespace WP_CLI\Plugin\Active_On_Sites;
 
 use WP_CLI;
+use function WP_CLI\Utils\make_progress_bar;
 
 if ( ! defined( 'WP_CLI' ) ) {
 	return;
@@ -102,20 +103,23 @@ if ( ! function_exists( __NAMESPACE__ . '\invoke' ) ) {
 	function find_sites_with_plugin( string $target_plugin ): array {
 		$sites       = get_sites( [ 'number' => 10000 ] );
 		$found_sites = [];
-		$notify      = new \cli\progress\Bar( 'Checking sites', count( $sites ) );
+		$notify      = make_progress_bar( 'Checking sites', count( $sites ) );
 
 		foreach ( $sites as $site ) {
-			switch_to_blog( $site->blog_id );
+			$blog_id = absint( $site->blog_id );
+
+			switch_to_blog( $blog_id );
 
 			$active_plugins     = get_option( 'active_plugins', [] );
 			$active_admin_email = get_option( 'admin_email' );
 
 			if ( is_array( $active_plugins ) ) {
 				$active_plugins = array_map( dirname( ... ), $active_plugins );
+
 				if ( in_array( $target_plugin, $active_plugins, true ) ) {
 					$found_sites[] = [
-						'blog_id'     => $site->blog_id,
-						'url'         => trailingslashit( get_site_url( $site->blog_id ) ),
+						'blog_id'     => $blog_id,
+						'url'         => trailingslashit( get_site_url( $blog_id ) ),
 						'admin_email' => $active_admin_email,
 					];
 				}
