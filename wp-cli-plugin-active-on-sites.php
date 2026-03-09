@@ -11,11 +11,6 @@
  * @package wp-cli-plugin-active-on-sites
  */
 
-/*
- * TODO
- * - Write unit tests
- */
-
 namespace WP_CLI\Plugin\Active_On_Sites;
 
 use WP_CLI;
