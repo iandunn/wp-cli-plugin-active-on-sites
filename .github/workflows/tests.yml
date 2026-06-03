@@ -1,0 +1,60 @@
+name: Tests
+
+on:
+  push:
+    paths:
+      - '**.php'
+      - 'features/**'
+      - 'bin/**'
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - '**.php'
+      - 'features/**'
+      - 'bin/**'
+      - '.github/workflows/**'
+
+jobs:
+  behat:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Patch autoloader to prevent double-loading
+        run: sed -i 's/require \$file;/require_once \$file;/' vendor/composer/autoload_real.php
+
+      - name: Prepare tests
+        run: composer prepare-tests
+        env:
+          WP_CLI_TEST_DBROOTUSER: root
+          WP_CLI_TEST_DBROOTPASS: root
+          WP_CLI_TEST_DBHOST: 127.0.0.1
+
+      - name: Run tests
+        run: composer behat
+        env:
+          WP_CLI_TEST_DBROOTUSER: root
+          WP_CLI_TEST_DBROOTPASS: root
+          WP_CLI_TEST_DBHOST: 127.0.0.1

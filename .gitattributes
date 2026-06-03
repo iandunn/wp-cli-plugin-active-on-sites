@@ -1,0 +1,5 @@
+* export-ignore
+
+/composer.json -export-ignore
+/README.md -export-ignore
+/wp-cli-plugin-active-on-sites.php -export-ignore
