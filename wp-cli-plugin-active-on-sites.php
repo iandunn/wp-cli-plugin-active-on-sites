@@ -1,6 +1,12 @@
 <?php
 /**
- * WP-CLI Plugin Active on Sites
+ * Plugin Name: WP-CLI Plugin Active on Sites
+ * Plugin URI:  https://github.com/iandunn/wp-cli-plugin-active-on-sites
+ * Description: A WP-CLI command to list all sites in a Multisite network that have activated a given plugin
+ * Version:     0.1.5
+ * Author:      Ian Dunn
+ * Author URI:  https://iandunn.name
+ * License:     GPL-2.0-or-later
  *
  * @package wp-cli-plugin-active-on-sites
  */

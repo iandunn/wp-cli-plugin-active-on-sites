@@ -5,9 +5,34 @@ A [WP-CLI](http://wp-cli.org/) command to list all sites in a Multisite network 
 
 ## Installing
 
-```bash
-composer require iandunn/wp-cli-plugin-active-on-sites
-```
+1. Ensure your `composer.json` has `composer/installers` and an `installer-paths` entry for `type:wordpress-plugin`:
+
+    ```json
+    {
+        "require": {
+            "composer/installers": "^2.0"
+        },
+        "extra": {
+            "installer-paths": {
+                "wp-content/plugins/{$name}/": ["type:wordpress-plugin"]
+            }
+        }
+    }
+    ```
+
+    Most Composer-managed WordPress projects already have this.
+
+2. Require the package:
+
+    ```bash
+    composer require iandunn/wp-cli-plugin-active-on-sites
+    ```
+
+3. Activate the plugin:
+
+    ```bash
+    wp plugin activate wp-cli-plugin-active-on-sites --network
+    ```
 
 
 ## Usage
