@@ -1,4 +1,6 @@
 default:
+  formatters:
+    progress: ~
   suites:
     default:
       contexts:

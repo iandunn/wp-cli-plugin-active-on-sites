@@ -17,6 +17,18 @@ export WP_CLI_TEST_DBHOST="localhost:${SOCKET}"
 export WP_CLI_TEST_DBROOTUSER="${WP_CLI_TEST_DBROOTUSER:-root}"
 export WP_CLI_TEST_DBROOTPASS="${WP_CLI_TEST_DBROOTPASS:-root}"
 
+# Grant the test user access to the test database via socket connection.
+# install-package-tests only grants access for '@%'; MySQL socket connections authenticate
+# as 'localhost', which MySQL treats as a different user, so both must be granted.
+TEST_USER_PASS="${WP_CLI_TEST_DBPASS:-password1}"
+mysql -u root -proot -e "
+	GRANT ALL PRIVILEGES ON \`wp_cli_test\`.* TO 'wp_cli_test'@'%';
+	GRANT CREATE ON *.* TO 'wp_cli_test'@'%';
+	CREATE USER IF NOT EXISTS 'wp_cli_test'@'localhost' IDENTIFIED WITH mysql_native_password BY '${TEST_USER_PASS}';
+	GRANT ALL PRIVILEGES ON \`wp_cli_test\`.* TO 'wp_cli_test'@'localhost';
+	GRANT CREATE ON *.* TO 'wp_cli_test'@'localhost';
+" 2>/dev/null || true
+
 # Find the full WP-CLI binary, skipping vendor/bin entries that lack plugin-install support.
 WP_CLI_BIN=""
 
@@ -27,8 +39,33 @@ while IFS= read -r -d ':' dir; do
 	fi
 done <<< "${PATH}:"
 
+# The Local.app PHP binary has a 128MB memory_limit which wp core download's extraction
+# exceeds. The test framework builds an explicit subprocess env (so PHP_INI_SCAN_DIR
+# never reaches wp), but it prepends WP_CLI_BIN_DIR to PATH for every subprocess. A
+# wrapper script there lets us pass -d memory_limit=512M directly to the PHP invocation.
 if [ -n "$WP_CLI_BIN" ]; then
-	export WP_CLI_BIN_DIR="$(dirname "$WP_CLI_BIN")"
+	WP_WRAPPER_DIR=$(mktemp -d)
+	PHP_BIN="$(which php)"
+
+	cat > "${WP_WRAPPER_DIR}/wp" << EOF
+#!/bin/bash
+exec "${PHP_BIN}" -d memory_limit=512M "${WP_CLI_BIN}" "\$@"
+EOF
+
+	chmod +x "${WP_WRAPPER_DIR}/wp"
+	export WP_CLI_BIN_DIR="${WP_WRAPPER_DIR}"
+	trap "rm -rf '${WP_WRAPPER_DIR}'" EXIT
 fi
 
-exec "$(dirname "$0")/../vendor/bin/run-behat-tests" "$@"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BEHAT="${SCRIPT_DIR}/../vendor/bin/behat"
+
+# If the download cache exists but is missing wp-config-sample.php it's partially corrupt —
+# WP-CLI would try to re-download but bootstrap from the stale files first, causing a fatal
+# error (e.g. missing InputValidator class). Delete it so the next run gets a clean extraction.
+DOWNLOAD_CACHE_DIR="$(php -r 'echo sys_get_temp_dir();')/wp-cli-test-core-download-cache"
+if [ -d "$DOWNLOAD_CACHE_DIR" ] && [ ! -f "$DOWNLOAD_CACHE_DIR/wp-config-sample.php" ]; then
+	rm -rf "$DOWNLOAD_CACHE_DIR"
+fi
+
+WP_CLI_TEST_DBNAME=wp_cli_test "$BEHAT" "$@"

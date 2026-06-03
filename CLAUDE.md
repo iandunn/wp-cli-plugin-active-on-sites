@@ -16,7 +16,7 @@ Behat integration tests (no unit tests). Two feature files in `features/`:
 
 Run tests inside the LocalWP shell:
 ```
-composer behat-localwp
+composer test
 ```
 
 The `bin/behat-localwp` wrapper auto-detects the MySQL socket so no env vars needed. Requires running inside a LocalWP shell (`wp-cli/wp-cli-tests` handles WP scaffolding).

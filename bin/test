@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Entry point for `composer test`, `composer test-rerun`, etc.
+# Routes to bin/behat-localwp in a LocalWP environment, or run-behat-tests otherwise.
+# Forwards all arguments so flags like --rerun pass through cleanly.
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+if [ -n "$LOCALWP_PHP_PATH" ]; then
+	exec "${SCRIPT_DIR}/behat-localwp" "$@"
+else
+	exec run-behat-tests "$@"
+fi

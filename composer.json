@@ -31,9 +31,14 @@
 	},
 
 	"scripts" : {
-		"behat"         : "run-behat-tests",
-		"behat-rerun"   : "run-behat-tests --rerun",
-		"behat-localwp" : "bin/behat-localwp",
+		"test"          : [
+			"Composer\\Config::disableProcessTimeout",
+			"bin/test"
+		],
+		"test-rerun"    : [
+			"Composer\\Config::disableProcessTimeout",
+			"bin/test --rerun"
+		],
 		"prepare-tests" : "install-package-tests"
 	},
 

@@ -55,3 +55,23 @@ Sites where eu-cookie-law-widget is active:
 | 654     | http://2017.europe.wordcamp.test/      |
 +---------+----------------------------------------+
 ```
+
+
+## Local Development
+
+```shell
+git clone https://github.com/iandunn/wp-cli-plugin-active-on-sites
+composer install
+composer prepare-tests
+```
+
+```shell
+composer test           # run all tests
+composer test-rerun		# re-run only failed scenarios
+
+composer test -- --tags=@network                                # run scenarios with a specific tag
+composer test -- features/plugin-active-on-sites.feature        # run a single feature file
+composer test -- features/plugin-active-on-sites.feature:42		# run a single scenario by line number
+```
+
+When run inside a LocalWP shell, `composer test` routes to `bin/behat-localwp`, which auto-detects the MySQL socket. Outside LocalWP (e.g. CI), it falls back to `run-behat-tests`.
