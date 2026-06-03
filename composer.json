@@ -3,7 +3,7 @@
 	"description" : "A WP-CLI command to list all sites in a Multisite network that have activated a given plugin",
 	"type"        : "library",
 	"homepage"    : "https://github.com/iandunn/wp-cli-plugin-active-on-sites",
-	"license"     : "GPLv2",
+	"license"     : "GPL-2.0-or-later",
 
 	"keywords" : [ "wp-cli", "wordpress", "multisite", "plugins" ],
 
