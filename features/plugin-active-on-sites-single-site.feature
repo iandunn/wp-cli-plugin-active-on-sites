@@ -4,7 +4,7 @@ Feature: Validate single-site installs are rejected
     Given a WP install
 
   Scenario: Command errors on single-site installs
-    When I try `wp plugin active-on-sites hello-dolly`
+    When I try `wp plugin active-on-sites wordpress-seo`
     Then STDERR should contain:
       """
       This only works on Multisite installations.

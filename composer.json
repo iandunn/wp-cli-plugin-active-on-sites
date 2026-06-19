@@ -20,10 +20,6 @@
 		}
 	],
 
-	"autoload" : {
-		"files" : [ "wp-cli-plugin-active-on-sites.php" ]
-	},
-
 	"require-dev" : {
 		"wp-cli/wp-cli-tests"      : "^4.2",
 		"wp-cli/extension-command" : "^2",

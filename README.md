@@ -38,7 +38,7 @@ Plugins not active on any site:
 | slug                      | name                         |
 +---------------------------+------------------------------+
 | akismet                   | Akismet Anti-Spam            |
-| hello-dolly               | Hello Dolly                  |
+| wordpress-seo             | Yoast SEO                    |
 +---------------------------+------------------------------+
 ```
 
